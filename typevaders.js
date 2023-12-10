@@ -7,6 +7,11 @@ document.body.appendChild(canvas);
 canvas.width = 500;
 canvas.height = 700;
 
+// Separate div for displaying scores
+const scoreContainer = document.createElement("div");
+scoreContainer.id = "score-container";
+document.body.appendChild(scoreContainer);
+
 // Player spaceship
 const player = {
     x: canvas.width / 2,
@@ -27,15 +32,23 @@ const enemies = [];
 const availableLetters = ['a', 's', 'd', 'f', 'j', 'k', 'l', ';'];
 
 // Initialize game variables (add more as needed)
-let score = 0;
-let lives = 3;
+// let score = 0;
+// let lives = 3;
 let currentWord = generateRandomWord();
 
 function generateRandomWord() {
     // Implement word generation logic
 }
 
+// Initialize hit and miss variables
+let hits = 0;
+let misses = 0;
 
+
+function drawScores() {
+    // Display hit and miss scores in the separate div
+    scoreContainer.innerHTML = `Hit: ${hits}    Miss: ${misses}`;
+}
 
 function createRandomEnemy() {
     const enemySize = 30; // Adjust the size of the enemy
@@ -107,6 +120,8 @@ function draw() {
     drawEnemies();
 
     // Implement other drawing logic (score, etc.)
+
+    drawScores();
 }
 
 // Draw player
@@ -194,15 +209,26 @@ function updateShots() {
 
 // Handle keyboard input
 document.addEventListener("keydown", function (event) {
-    console.log('Key pressed:', event.key);
-
     const pressedKey = event.key.toLowerCase();
 
+    // Create a shot for the pressed key
     if (availableLetters.includes(pressedKey)) {
-        // If the pressed key is in availableLetters, call the shoot function
         shoot(pressedKey);
     }
-   
+
+    // Check if any enemies with the pressed letter are on the screen
+    const matchingEnemies = enemies.filter(enemy => enemy.letter === pressedKey);
+    if (matchingEnemies.length > 0) {
+        // Remove the first matching enemy (the one at the bottom)
+        enemies.splice(enemies.indexOf(matchingEnemies[0]), 1);
+        
+        // Increment the hit count
+        hits++;
+    } else if (availableLetters.includes(pressedKey)) {
+        // Increment the miss count if the pressed key is not on the screen
+        misses++;
+    }
+  
 });
 
 
@@ -215,6 +241,9 @@ function update() {
     updateEnemies();
 
     // Implement game logic (collision detection, etc.)
+
+    // Draw scores
+    drawScores();
 }
 
 function gameLoop() {
