@@ -22,6 +22,8 @@ const shots = [];
 // Enemies (small triangles)
 const enemies = [];
 
+const availableLetters = ['a', 's', 'd', 'f', 'j', 'k', 'l', ';'];
+
 // Initialize game variables (add more as needed)
 let score = 0;
 let lives = 3;
@@ -41,6 +43,25 @@ function createEnemy() {
         width: enemySize,
         height: enemySize,
         speed: enemySpeed,
+        letter: 'j', // The letter associated with the enemy
+    };
+
+    enemies.push(enemy);
+}
+
+function createRandomEnemy() {
+    const enemySize = 20; // Adjust the size of the enemy
+    const enemySpeed = 2; // Adjust the speed of the enemy
+
+    const randomLetter = availableLetters[Math.floor(Math.random() * availableLetters.length)];
+
+    const enemy = {
+        x: Math.random() * (canvas.width - enemySize),
+        y: 0,
+        width: enemySize,
+        height: enemySize,
+        speed: enemySpeed,
+        letter: randomLetter,
     };
 
     enemies.push(enemy);
@@ -60,6 +81,12 @@ function drawEnemies() {
         ctx.lineWidth = 2;
         ctx.fill();
         ctx.stroke();
+
+        // Display the letter next to the enemy
+        ctx.fillStyle = 'white';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(enemy.letter, enemy.x, enemy.y + enemy.height + 12);
     }
 }
 
@@ -110,22 +137,62 @@ function drawShots() {
     }
 }
 
+
 function updateShots() {
     for (let i = 0; i < shots.length; i++) {
         shots[i].y -= 5; // Adjust the speed of the shots
-        if (shots[i].y < 0) {
-            shots.splice(i, 1); // Remove shots that go off-screen
+
+        // Check for collision with enemies
+        for (let j = 0; j < enemies.length; j++) {
+            const enemy = enemies[j];
+            if (
+                shots[i].x > enemy.x - enemy.width / 2 &&
+                shots[i].x < enemy.x + enemy.width / 2 &&
+                shots[i].y > enemy.y &&
+                shots[i].y < enemy.y + enemy.height
+            ) {
+                // Shot hit the enemy, remove the shot and damage the enemy
+                shots.splice(i, 1);
+                i--;
+
+                // Reduce enemy health or remove it if health becomes zero
+                // For simplicity, let's remove the enemy directly
+                enemies.splice(j, 1);
+                // Add your logic for scoring or other actions here
+            }
+        }
+
+        // Remove shots that go off-screen
+        if (shots[i] && shots[i].y < 0) {
+            shots.splice(i, 1);
             i--;
+        }
+    }
+
+    // If there are enemies, update the shots to target the first one
+    if (enemies.length > 0) {
+        for (let i = 0; i < shots.length; i++) {
+            const dx = enemies[0].x - player.x;
+            const dy = enemies[0].y - player.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const speed = 5; // Adjust the speed of the shots
+
+            shots[i].x += (dx / distance) * speed;
+            shots[i].y += (dy / distance) * speed;
         }
     }
 }
 
+
 // Handle keyboard input
 document.addEventListener("keydown", function (event) {
-    if (event.key === " ") {
+    const pressedKey = event.key.toLowerCase();
+    
+    if (pressedKey === "j") {
         shots.push({ x: player.x, y: player.y });
     }
 });
+
 
 function update() {
     // Update shots
@@ -145,7 +212,7 @@ function gameLoop() {
 }
 
 // Create new enemies at a regular interval
-setInterval(createEnemy, 1500);
+setInterval(createRandomEnemy, 2000); // Every 2 seconds
 
 // Start the game loop
 gameLoop();
