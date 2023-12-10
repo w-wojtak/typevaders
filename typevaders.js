@@ -4,8 +4,8 @@ const ctx = canvas.getContext("2d");
 document.body.appendChild(canvas);
 
 // Set canvas size
-canvas.width = 400;
-canvas.height = 600;
+canvas.width = 500;
+canvas.height = 700;
 
 // Player spaceship
 const player = {
@@ -16,7 +16,7 @@ const player = {
     color: 'white',
 };
 
-const font = '20px Arial';
+const font = '24px Arial';
 
 // Shots fired by the player
 const shots = [];
@@ -38,13 +38,14 @@ function generateRandomWord() {
 
 
 function createRandomEnemy() {
-    const enemySize = 25; // Adjust the size of the enemy
+    const enemySize = 30; // Adjust the size of the enemy
     const enemySpeed = 3; // Adjust the speed of the enemy
+    const margin = 20; // Adjust the margin to ensure enemies are not too close to the borders
 
     const randomLetter = availableLetters[Math.floor(Math.random() * availableLetters.length)];
 
     const enemy = {
-        x: Math.random() * (canvas.width - enemySize),
+        x: Math.random() * (canvas.width - 2 * margin - enemySize) + margin,
         y: 0,
         width: enemySize,
         height: enemySize,
@@ -224,7 +225,7 @@ function gameLoop() {
 }
 
 // Create new enemies at a regular interval
-setInterval(createRandomEnemy, 2000); // Every 2 seconds
+setInterval(createRandomEnemy, 700); // Every x miliseconds
 
 // Start the game loop
 gameLoop();
