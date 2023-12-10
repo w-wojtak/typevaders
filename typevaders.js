@@ -16,6 +16,8 @@ const player = {
     color: 'white',
 };
 
+const font = '20px Arial';
+
 // Shots fired by the player
 const shots = [];
 
@@ -36,8 +38,8 @@ function generateRandomWord() {
 
 
 function createRandomEnemy() {
-    const enemySize = 20; // Adjust the size of the enemy
-    const enemySpeed = 2; // Adjust the speed of the enemy
+    const enemySize = 25; // Adjust the size of the enemy
+    const enemySpeed = 3; // Adjust the speed of the enemy
 
     const randomLetter = availableLetters[Math.floor(Math.random() * availableLetters.length)];
 
@@ -70,9 +72,9 @@ function drawEnemies() {
 
         // Display the letter next to the enemy
         ctx.fillStyle = 'white';
-        ctx.font = '16px Arial';
+        ctx.font = font;
         ctx.textAlign = 'center';
-        ctx.fillText(enemy.letter, enemy.x, enemy.y + enemy.height + 12);
+        ctx.fillText(enemy.letter, enemy.x, enemy.y + enemy.height + 20);
     }
 }
 
@@ -157,14 +159,16 @@ function updateShots() {
         shots[i].x += shots[i].velocityX;
         shots[i].y += shots[i].velocityY;
 
-        // Check for collision with enemies
+        // Check for collision with enemies with a small margin (e.g., 5 pixels)
         for (let j = 0; j < enemies.length; j++) {
             const enemy = enemies[j];
+            const margin = 5; // Adjust the margin as needed
+
             if (
-                shots[i].x > enemy.x - enemy.width / 2 &&
-                shots[i].x < enemy.x + enemy.width / 2 &&
-                shots[i].y > enemy.y &&
-                shots[i].y < enemy.y + enemy.height
+                shots[i].x + margin > enemy.x - enemy.width / 2 &&
+                shots[i].x - margin < enemy.x + enemy.width / 2 &&
+                shots[i].y + margin > enemy.y &&
+                shots[i].y - margin < enemy.y + enemy.height
             ) {
                 // Reduce enemy health or remove it if health becomes zero
                 // For simplicity, let's remove the enemy directly
