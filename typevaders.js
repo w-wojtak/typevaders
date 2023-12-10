@@ -120,6 +120,7 @@ function draw() {
     // Implement other drawing logic (score, etc.)
 }
 
+// Draw player
 function drawPlayer() {
     ctx.beginPath();
     ctx.moveTo(player.x, player.y);
@@ -130,7 +131,34 @@ function drawPlayer() {
     ctx.closePath();
 }
 
+function shoot(letter) {
+    console.log('Shoot called for letter:', letter);
+
+    const matchingEnemy = enemies.find(enemy => enemy.letter === letter);
+    if (matchingEnemy) {
+        // Calculate the angle between the player and the enemy
+        const angle = Math.atan2(matchingEnemy.y - player.y, matchingEnemy.x - player.x);
+
+        // Calculate the components of the shot's velocity
+        const speed = 5; // Adjust the speed of the shots
+        const velocityX = speed * Math.cos(angle);
+        const velocityY = speed * Math.sin(angle);
+
+        const shot = {
+            x: player.x,
+            y: player.y,
+            velocityX: velocityX,
+            velocityY: velocityY,
+        };
+
+        shots.push(shot);
+        console.log('Number of shots:', shots.length);
+    }
+}
+
+// Function to draw shots
 function drawShots() {
+    // console.log('Number of shots:', shots.length);
     for (let i = 0; i < shots.length; i++) {
         ctx.fillStyle = 'white';
         ctx.fillRect(shots[i].x, shots[i].y, 2, 5); // Adjust size as needed
@@ -138,11 +166,14 @@ function drawShots() {
 }
 
 
+
+// Function to update the position of shots and handle collisions
 function updateShots() {
     for (let i = 0; i < shots.length; i++) {
-        shots[i].y -= 5; // Adjust the speed of the shots
+        shots[i].x += shots[i].velocityX;
+        shots[i].y += shots[i].velocityY;
 
-        // Check for collision with enemies
+        // Handle collisions with enemies
         for (let j = 0; j < enemies.length; j++) {
             const enemy = enemies[j];
             if (
@@ -151,13 +182,10 @@ function updateShots() {
                 shots[i].y > enemy.y &&
                 shots[i].y < enemy.y + enemy.height
             ) {
-                // Shot hit the enemy, remove the shot and damage the enemy
+                // Remove the shot and the enemy
                 shots.splice(i, 1);
-                i--;
-
-                // Reduce enemy health or remove it if health becomes zero
-                // For simplicity, let's remove the enemy directly
                 enemies.splice(j, 1);
+                i--; // Adjust the index after removing the shot
                 // Add your logic for scoring or other actions here
             }
         }
@@ -168,30 +196,30 @@ function updateShots() {
             i--;
         }
     }
-
-    // If there are enemies, update the shots to target the first one
-    if (enemies.length > 0) {
-        for (let i = 0; i < shots.length; i++) {
-            const dx = enemies[0].x - player.x;
-            const dy = enemies[0].y - player.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const speed = 5; // Adjust the speed of the shots
-
-            shots[i].x += (dx / distance) * speed;
-            shots[i].y += (dy / distance) * speed;
-        }
-    }
 }
-
 
 // Handle keyboard input
 document.addEventListener("keydown", function (event) {
+    console.log('Key pressed:', event.key);
+
     const pressedKey = event.key.toLowerCase();
-    
-    if (pressedKey === "j") {
-        shots.push({ x: player.x, y: player.y });
+
+    if (availableLetters.includes(pressedKey)) {
+        // If the pressed key is in availableLetters, call the shoot function
+        shoot(pressedKey);
     }
+
+    // Check if any enemies with the pressed letter are on the screen
+    const matchingEnemies = enemies.filter(enemy => enemy.letter === pressedKey);
+    if (matchingEnemies.length > 0) {
+        // Remove the first matching enemy (the one at the bottom)
+        enemies.splice(enemies.indexOf(matchingEnemies[0]), 1);
+        // Add your logic for scoring or other actions here
+    }
+
+   
 });
+
 
 
 function update() {
@@ -205,9 +233,9 @@ function update() {
 }
 
 function gameLoop() {
+    updateShots(); // Add this line to explicitly call updateShots
     update();
     draw();
-
     requestAnimationFrame(gameLoop);
 }
 
