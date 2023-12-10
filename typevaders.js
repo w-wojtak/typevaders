@@ -33,21 +33,7 @@ function generateRandomWord() {
     // Implement word generation logic
 }
 
-function createEnemy() {
-    const enemySize = 20; // Adjust the size of the enemy
-    const enemySpeed = 2; // Adjust the speed of the enemy
 
-    const enemy = {
-        x: Math.random() * (canvas.width - enemySize),
-        y: 0,
-        width: enemySize,
-        height: enemySize,
-        speed: enemySpeed,
-        letter: 'j', // The letter associated with the enemy
-    };
-
-    enemies.push(enemy);
-}
 
 function createRandomEnemy() {
     const enemySize = 20; // Adjust the size of the enemy
@@ -84,7 +70,7 @@ function drawEnemies() {
 
         // Display the letter next to the enemy
         ctx.fillStyle = 'white';
-        ctx.font = '12px Arial';
+        ctx.font = '16px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(enemy.letter, enemy.x, enemy.y + enemy.height + 12);
     }
@@ -140,7 +126,7 @@ function shoot(letter) {
         const angle = Math.atan2(matchingEnemy.y - player.y, matchingEnemy.x - player.x);
 
         // Calculate the components of the shot's velocity
-        const speed = 5; // Adjust the speed of the shots
+        const speed = 25; // Adjust the speed of the shots
         const velocityX = speed * Math.cos(angle);
         const velocityY = speed * Math.sin(angle);
 
@@ -166,14 +152,12 @@ function drawShots() {
 }
 
 
-
-// Function to update the position of shots and handle collisions
 function updateShots() {
     for (let i = 0; i < shots.length; i++) {
         shots[i].x += shots[i].velocityX;
         shots[i].y += shots[i].velocityY;
 
-        // Handle collisions with enemies
+        // Check for collision with enemies
         for (let j = 0; j < enemies.length; j++) {
             const enemy = enemies[j];
             if (
@@ -182,21 +166,26 @@ function updateShots() {
                 shots[i].y > enemy.y &&
                 shots[i].y < enemy.y + enemy.height
             ) {
-                // Remove the shot and the enemy
-                shots.splice(i, 1);
+                // Reduce enemy health or remove it if health becomes zero
+                // For simplicity, let's remove the enemy directly
                 enemies.splice(j, 1);
-                i--; // Adjust the index after removing the shot
                 // Add your logic for scoring or other actions here
-            }
-        }
 
-        // Remove shots that go off-screen
-        if (shots[i] && shots[i].y < 0) {
-            shots.splice(i, 1);
-            i--;
+                // Remove the shot that hit the enemy
+                shots.splice(i, 1);
+                i--; // Decrement i to recheck the current index
+
+                // Break the loop to ensure that only one enemy is affected by each shot
+                break;
+            }
         }
     }
 }
+
+
+
+
+
 
 // Handle keyboard input
 document.addEventListener("keydown", function (event) {
@@ -208,15 +197,6 @@ document.addEventListener("keydown", function (event) {
         // If the pressed key is in availableLetters, call the shoot function
         shoot(pressedKey);
     }
-
-    // Check if any enemies with the pressed letter are on the screen
-    const matchingEnemies = enemies.filter(enemy => enemy.letter === pressedKey);
-    if (matchingEnemies.length > 0) {
-        // Remove the first matching enemy (the one at the bottom)
-        enemies.splice(enemies.indexOf(matchingEnemies[0]), 1);
-        // Add your logic for scoring or other actions here
-    }
-
    
 });
 
