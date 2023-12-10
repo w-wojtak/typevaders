@@ -19,6 +19,9 @@ const player = {
 // Shots fired by the player
 const shots = [];
 
+// Enemies (small triangles)
+const enemies = [];
+
 // Initialize game variables (add more as needed)
 let score = 0;
 let lives = 3;
@@ -26,6 +29,52 @@ let currentWord = generateRandomWord();
 
 function generateRandomWord() {
     // Implement word generation logic
+}
+
+function createEnemy() {
+    const enemySize = 20; // Adjust the size of the enemy
+    const enemySpeed = 2; // Adjust the speed of the enemy
+
+    const enemy = {
+        x: Math.random() * (canvas.width - enemySize),
+        y: 0,
+        width: enemySize,
+        height: enemySize,
+        speed: enemySpeed,
+    };
+
+    enemies.push(enemy);
+}
+
+function drawEnemies() {
+    for (let i = 0; i < enemies.length; i++) {
+        const enemy = enemies[i];
+
+        ctx.beginPath();
+        ctx.moveTo(enemy.x, enemy.y);
+        ctx.lineTo(enemy.x - enemy.width / 2, enemy.y + enemy.height);
+        ctx.lineTo(enemy.x + enemy.width / 2, enemy.y + enemy.height);
+        ctx.closePath();  // Close the path to connect the last and first points
+        ctx.fillStyle = 'black';
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+        ctx.fill();
+        ctx.stroke();
+    }
+}
+
+
+function updateEnemies() {
+    for (let i = 0; i < enemies.length; i++) {
+        const enemy = enemies[i];
+        enemy.y += enemy.speed;
+
+        // Remove enemies that go off-screen
+        if (enemy.y > canvas.height) {
+            enemies.splice(i, 1);
+            i--;
+        }
+    }
 }
 
 function draw() {
@@ -38,7 +87,10 @@ function draw() {
     // Draw shots
     drawShots();
 
-    // Implement other drawing logic (enemies, words, score, etc.)
+    // Draw enemies
+    drawEnemies();
+
+    // Implement other drawing logic (score, etc.)
 }
 
 function drawPlayer() {
@@ -79,7 +131,10 @@ function update() {
     // Update shots
     updateShots();
 
-    // Implement game logic (movement, collision detection, etc.)
+    // Update enemies
+    updateEnemies();
+
+    // Implement game logic (collision detection, etc.)
 }
 
 function gameLoop() {
@@ -89,7 +144,8 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-
+// Create new enemies at a regular interval
+setInterval(createEnemy, 1500);
 
 // Start the game loop
 gameLoop();
