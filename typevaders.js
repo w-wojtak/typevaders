@@ -51,14 +51,13 @@ function drawScores() {
 }
 
 function createRandomEnemy() {
-    const enemySize = 30; // Adjust the size of the enemy
-    const enemySpeed = 3; // Adjust the speed of the enemy
+    const enemySize = 25; // Adjust the size of the enemy
+    const enemySpeed = 2; // Adjust the speed of the enemy
     const margin = 20; // Adjust the margin to ensure enemies are not too close to the borders
 
     const randomLetter = availableLetters[Math.floor(Math.random() * availableLetters.length)];
-
-    // Randomly choose a shape (0: triangle, 1: square, 2: pentagon)
-    const randomShape = Math.floor(Math.random() * 3);
+    const shape = Math.floor(Math.random() * 3); // 0 for triangle, 1 for square, 2 for pentagon
+    const rotationSpeed = (Math.random() - 0.5) * 0.02; // Random rotation speed within limits
 
     const enemy = {
         x: Math.random() * (canvas.width - 2 * margin - enemySize) + margin,
@@ -67,34 +66,44 @@ function createRandomEnemy() {
         height: enemySize,
         speed: enemySpeed,
         letter: randomLetter,
-        shape: randomShape, // Store the selected shape
+        shape: shape,
+        rotation: 0, // Initial rotation angle
+        rotationSpeed: rotationSpeed, // Rotation speed
     };
 
     enemies.push(enemy);
 }
 
+
+
 function drawEnemies() {
     for (let i = 0; i < enemies.length; i++) {
         const enemy = enemies[i];
 
+        ctx.save(); // Save the current transformation state
+        ctx.translate(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2); // Translate to the center of the enemy
+
+        // Rotate the enemy with a small angle (in radians)
+        ctx.rotate(enemy.rotation);
+
         ctx.fillStyle = 'black';
         ctx.strokeStyle = 'white';
         ctx.lineWidth = 2;
-        
+
         // Draw the selected shape based on the shape property
         switch (enemy.shape) {
             case 0: // Triangle
                 ctx.beginPath();
-                ctx.moveTo(enemy.x, enemy.y);
-                ctx.lineTo(enemy.x - enemy.width / 2, enemy.y + enemy.height);
-                ctx.lineTo(enemy.x + enemy.width / 2, enemy.y + enemy.height);
+                ctx.moveTo(0, -enemy.height / 2);
+                ctx.lineTo(-enemy.width / 2, enemy.height / 2);
+                ctx.lineTo(enemy.width / 2, enemy.height / 2);
                 ctx.closePath();
                 ctx.fill();
                 ctx.stroke();
                 break;
             case 1: // Square
-                ctx.fillRect(enemy.x - enemy.width / 2, enemy.y, enemy.width, enemy.height);
-                ctx.strokeRect(enemy.x - enemy.width / 2, enemy.y, enemy.width, enemy.height);
+                ctx.fillRect(-enemy.width / 2, -enemy.height / 2, enemy.width, enemy.height);
+                ctx.strokeRect(-enemy.width / 2, -enemy.height / 2, enemy.width, enemy.height);
                 break;
             case 2: // Pentagon
                 const sideLength = enemy.width / 2;
@@ -102,15 +111,15 @@ function drawEnemies() {
 
                 ctx.beginPath();
                 ctx.moveTo(
-                    enemy.x + Math.cos(angleOffset) * sideLength,
-                    enemy.y + Math.sin(angleOffset) * sideLength
+                    Math.cos(angleOffset) * sideLength,
+                    Math.sin(angleOffset) * sideLength
                 );
 
                 for (let j = 1; j < 5; j++) {
                     const angle = angleOffset + (Math.PI * 2 * j) / 5;
                     ctx.lineTo(
-                        enemy.x + Math.cos(angle) * sideLength,
-                        enemy.y + Math.sin(angle) * sideLength
+                        Math.cos(angle) * sideLength,
+                        Math.sin(angle) * sideLength
                     );
                 }
 
@@ -120,19 +129,26 @@ function drawEnemies() {
                 break;
         }
 
+        ctx.restore(); // Restore the original transformation state
+
         // Display the letter next to the enemy
         ctx.fillStyle = 'white';
         ctx.font = font;
         ctx.textAlign = 'center';
-        ctx.fillText(enemy.letter, enemy.x, enemy.y + enemy.height + 20);
+        ctx.fillText(enemy.letter, enemy.x + enemy.width / 2, enemy.y + enemy.height / 2 + 35);
     }
 }
+
+
 
 
 function updateEnemies() {
     for (let i = 0; i < enemies.length; i++) {
         const enemy = enemies[i];
         enemy.y += enemy.speed;
+
+        // Update enemy rotation
+        enemy.rotation += enemy.rotationSpeed;
 
         // Remove enemies that go off-screen
         if (enemy.y > canvas.height) {
@@ -141,6 +157,8 @@ function updateEnemies() {
         }
     }
 }
+
+
 
 function draw() {
     // Clear the canvas
@@ -237,8 +255,6 @@ function updateShots() {
         }
     }
 }
-
-
 
 
 
