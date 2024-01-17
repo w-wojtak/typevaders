@@ -57,6 +57,9 @@ function createRandomEnemy() {
 
     const randomLetter = availableLetters[Math.floor(Math.random() * availableLetters.length)];
 
+    // Randomly choose a shape (0: triangle, 1: square, 2: pentagon)
+    const randomShape = Math.floor(Math.random() * 3);
+
     const enemy = {
         x: Math.random() * (canvas.width - 2 * margin - enemySize) + margin,
         y: 0,
@@ -64,6 +67,7 @@ function createRandomEnemy() {
         height: enemySize,
         speed: enemySpeed,
         letter: randomLetter,
+        shape: randomShape, // Store the selected shape
     };
 
     enemies.push(enemy);
@@ -73,16 +77,48 @@ function drawEnemies() {
     for (let i = 0; i < enemies.length; i++) {
         const enemy = enemies[i];
 
-        ctx.beginPath();
-        ctx.moveTo(enemy.x, enemy.y);
-        ctx.lineTo(enemy.x - enemy.width / 2, enemy.y + enemy.height);
-        ctx.lineTo(enemy.x + enemy.width / 2, enemy.y + enemy.height);
-        ctx.closePath();  // Close the path to connect the last and first points
         ctx.fillStyle = 'black';
         ctx.strokeStyle = 'white';
         ctx.lineWidth = 2;
-        ctx.fill();
-        ctx.stroke();
+        
+        // Draw the selected shape based on the shape property
+        switch (enemy.shape) {
+            case 0: // Triangle
+                ctx.beginPath();
+                ctx.moveTo(enemy.x, enemy.y);
+                ctx.lineTo(enemy.x - enemy.width / 2, enemy.y + enemy.height);
+                ctx.lineTo(enemy.x + enemy.width / 2, enemy.y + enemy.height);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                break;
+            case 1: // Square
+                ctx.fillRect(enemy.x - enemy.width / 2, enemy.y, enemy.width, enemy.height);
+                ctx.strokeRect(enemy.x - enemy.width / 2, enemy.y, enemy.width, enemy.height);
+                break;
+            case 2: // Pentagon
+                const sideLength = enemy.width / 2;
+                const angleOffset = Math.PI / 10; // Offset angle to start drawing the pentagon
+
+                ctx.beginPath();
+                ctx.moveTo(
+                    enemy.x + Math.cos(angleOffset) * sideLength,
+                    enemy.y + Math.sin(angleOffset) * sideLength
+                );
+
+                for (let j = 1; j < 5; j++) {
+                    const angle = angleOffset + (Math.PI * 2 * j) / 5;
+                    ctx.lineTo(
+                        enemy.x + Math.cos(angle) * sideLength,
+                        enemy.y + Math.sin(angle) * sideLength
+                    );
+                }
+
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                break;
+        }
 
         // Display the letter next to the enemy
         ctx.fillStyle = 'white';
